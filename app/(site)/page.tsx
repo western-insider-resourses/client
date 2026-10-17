@@ -5,8 +5,11 @@ import Pagination from '@/components/Pagination';
 
 export const revalidate = 30;
 
-export default async function Home({ searchParams }: { searchParams?: { page?: string } }) {
-  const page = Number(searchParams?.page) || 1;
+type SearchParams = Promise<{ page?: string }>;
+
+export default async function Home({ searchParams }: { searchParams?: SearchParams }) {
+  const sp = (await searchParams) ?? {};
+  const page = Number(sp.page) || 1;
   const data = await getPosts({ page, limit: 11 });
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
