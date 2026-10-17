@@ -15,7 +15,8 @@ import Comments from '@/components/Comments';
 
 export const revalidate = 30;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const post = await getPost(params.slug);
   if (!post) return { title: 'Story not found' };
   const image = post.images?.[0]?.url && cl(post.images[0].url, 1200);
@@ -36,7 +37,8 @@ function Figure({ img }: { img: PostImage }) {
   );
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
+export default async function PostPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const post = await getPost(params.slug);
   if (!post) notFound();
 

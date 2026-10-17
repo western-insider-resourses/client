@@ -5,7 +5,8 @@ import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = { title: 'Search' };
 
-export default async function Search({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function Search(props: { searchParams?: Promise<{ q?: string }> }) {
+  const searchParams = await props.searchParams;
   const q = (searchParams?.q || '').trim();
   const data = q ? await getPosts({ q, limit: 24 }) : null;
   return (
