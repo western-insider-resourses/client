@@ -7,18 +7,33 @@ import Pagination from '@/components/Pagination';
 
 export const revalidate = 30;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<{ page?: string }>;
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { slug } = await params;
   const cats = await getCategories();
-  const c = cats.find((x) => x.slug === params.slug);
+  const c = cats.find((x) => x.slug === slug);
   return { title: c ? c.name : 'Category' };
 }
 
-export default async function CategoryPage({ params, searchParams }: { params: { slug: string }; searchParams?: { page?: string } }) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams?: SearchParams;
+}) {
+  const { slug } = await params;
+  const sp = (await searchParams) ?? {};
+
   const cats = await getCategories();
-  const cat = cats.find((c) => c.slug === params.slug);
+  const cat = cats.find((c) => c.slug === slug);
   if (!cat) notFound();
-  const page = Number(searchParams?.page) || 1;
+
+  const page = Number(sp.page) || 1;
   const data = await getPosts({ category: cat.slug, page, limit: 12 });
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       <div>
