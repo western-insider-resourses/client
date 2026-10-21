@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { getErrorMessage } from '@/services/client';
-import { usePosts } from '@/hooks/api/usePosts';
-import type { PostQuery } from '@/services/api/types';
-import StoryList from '@/components/StoryList';
-import Pagination from '@/components/Pagination';
+import { getErrorMessage } from "@/services/client";
+import { usePosts } from "@/hooks/api/usePosts";
+import type { PostQuery } from "@/services/api/types";
+import StoryList from "@/components/StoryList";
+import Pagination from "@/components/Pagination";
 
 interface Props {
   params?: PostQuery;
@@ -17,7 +17,7 @@ interface Props {
 export default function StoryFeed({
   params,
   withFeatured = false,
-  base = '/',
+  base = "/",
   heading,
   showEmptyQuery = false,
 }: Props) {
@@ -25,14 +25,34 @@ export default function StoryFeed({
 
   return (
     <section>
-      <h1 className={showEmptyQuery ? 'mb-6 font-serif text-3xl font-extrabold' : 'sr-only'}>{heading}</h1>
-      {showEmptyQuery && !params?.q && <p className="text-mute">Type a word in the search box above.</p>}
-      {query.isPending && (!showEmptyQuery || params?.q) && <p role="status" className="text-mute">Loading stories...</p>}
-      {query.error && <p role="alert" className="text-sm text-red-700">{getErrorMessage(query.error)}</p>}
+      <h1
+        className={
+          showEmptyQuery ? "mb-6 font-serif text-3xl font-extrabold" : "sr-only"
+        }
+      >
+        {heading}
+      </h1>
+      {showEmptyQuery && !params?.q && (
+        <p className="text-mute">Type a word in the search box above.</p>
+      )}
+      {query.isPending && (!showEmptyQuery || params?.q) && (
+        <p role="status" className="text-mute">
+          Loading stories...
+        </p>
+      )}
+      {query.error && (
+        <p role="alert" className="text-sm text-red-700">
+          {getErrorMessage(query.error)}
+        </p>
+      )}
       {params && query.data && (
         <>
           <StoryList posts={query.data.posts} withFeatured={withFeatured} />
-          <Pagination page={query.data.page} pages={query.data.pages} base={base} />
+          <Pagination
+            page={query.data.page}
+            pages={query.data.pages}
+            base={base}
+          />
         </>
       )}
     </section>

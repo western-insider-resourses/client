@@ -1,13 +1,17 @@
-import type { Metadata } from 'next';
-import CategoryFeed from '@/components/CategoryFeed';
-import Sidebar from '@/components/Sidebar';
+import type { Metadata } from "next";
+import CategoryFeed from "@/components/CategoryFeed";
+import Sidebar from "@/components/Sidebar";
 
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ page?: string }>;
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Params;
+}): Promise<Metadata> {
   await params;
-  return { title: 'Category' };
+  return { title: "Category" };
 }
 
 export default async function CategoryPage({
