@@ -1,17 +1,15 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SITE_NAME } from '@/lib/api';
+import { SITE_NAME } from '@/lib/site';
 import navyLogo from '@/assets/navy_logo_transparent.png';
 import whiteLogo from '@/assets/white_logo_transparent.png';
-import { getCategories } from '@/lib/data';
 import NavTabs from '@/components/NavTabs';
-import Tracker from '@/components/Tracker';
 import AdSlot from '@/components/AdSlot';
 import SocialLinks from '@/components/SocialLinks';
+import Tracker from '@/components/Tracker';
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const categories = await getCategories();
   return (
     <>
       <Tracker />
@@ -28,7 +26,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             <input id="q" name="q" placeholder="Search stories" className="input w-64" />
           </form>
         </div>
-        <div className="mx-auto max-w-6xl px-4"><NavTabs categories={categories} /></div>
+        <div className="mx-auto max-w-6xl px-4"><NavTabs /></div>
       </header>
 
       <div className="mx-auto max-w-6xl px-4 pt-6"><AdSlot placement="header" /></div>

@@ -1,36 +1,58 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { api } from '@/services/client';
+import { listCategoriesApi } from '@/services/api/categories.api';
+import { listPostsApi, getPostApi, listTrendingPostsApi } from '@/services/api/posts.api';
+import { listCommentsApi, createCommentApi } from '@/services/api/comments.api';
+import { getLikeApi, toggleLikeApi } from '@/services/api/likes.api';
+import { listAdsApi } from '@/services/api/ads.api';
+import { listSocialLinksApi } from '@/services/api/social.api';
+import { trackEventApi } from '@/services/api/tracking.api';
 
-afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.resetModules(); });
+afterEach(() => vi.restoreAllMocks());
 
-describe('data layer', () => {
-  it('uses dummy data by default', async () => {
-    const fetchSpy = vi.fn();
-    vi.stubGlobal('fetch', fetchSpy);
-    const data = await import('@/lib/data');
-    expect(data.USE_DUMMY).toBe(true);
-    expect((await data.getCategories()).map((c) => c.slug)).toContain('investment');
-    expect((await data.getPosts({ category: 'finance' }))!.posts.every((p) => p.category_slug === 'finance')).toBe(true);
-    expect((await data.getPost('negotiating-a-raise'))!.title).toMatch(/raise/);
-    expect(fetchSpy).not.toHaveBeenCalled();
+describe('public API services', () => {
+  it('requests categories, posts, trending stories, and an encoded post slug', async () => {
+    const get = vi.spyOn(api, 'get').mockResolvedValue({ data: [] });
+
+    await listCategoriesApi();
+    await listPostsApi({ category: 'career', page: 2, limit: 5 });
+    await listTrendingPostsApi();
+    await getPostApi('slug/with space');
+
+    expect(get).toHaveBeenNthCalledWith(1, '/v1/categories');
+    expect(get).toHaveBeenNthCalledWith(2, '/v1/posts', {
+      params: { category: 'career', page: 2, limit: 5 },
+    });
+    expect(get).toHaveBeenNthCalledWith(3, '/v1/posts/trending');
+    expect(get).toHaveBeenNthCalledWith(4, '/v1/posts/slug%2Fwith%20space');
   });
 
-  it('calls the API when dummy data is switched off', async () => {
-    vi.stubEnv('NEXT_PUBLIC_USE_DUMMY_DATA', 'false');
-    const fetchSpy = vi.fn(async () => ({ ok: true, json: async () => ({ posts: [], page: 1, pages: 1, total: 0 }) }));
-    vi.stubGlobal('fetch', fetchSpy);
-    const data = await import('@/lib/data');
-    expect(data.USE_DUMMY).toBe(false);
-    await data.getPosts({ category: 'career', page: 2, limit: 5 });
-    const calls = fetchSpy.mock.calls as unknown as Array<[string]>;
-    expect(calls[0]![0]).toContain('/posts?category=career&page=2&limit=5');
-  });
+  it('supports comments, likes, ads, social links, and tracking requests', async () => {
+    const get = vi.spyOn(api, 'get').mockResolvedValue({ data: [] });
+    const post = vi.spyOn(api, 'post').mockResolvedValue({ data: { ok: true } });
 
-  it('degrades to empty results when the API is down', async () => {
-    vi.stubEnv('NEXT_PUBLIC_USE_DUMMY_DATA', 'false');
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('down'); }));
-    const data = await import('@/lib/data');
-    expect(await data.getCategories()).toEqual([]);
-    expect(await data.getPosts()).toBeNull();
-    expect(await data.getPost('x')).toBeNull();
+    await listCommentsApi('story/example');
+    await createCommentApi('story/example', { name: 'Jane', body: 'Hello' });
+    await getLikeApi('story/example', 'visitor-1');
+    await toggleLikeApi('story/example', 'visitor-1');
+    await listAdsApi('sidebar');
+    await listSocialLinksApi();
+    await trackEventApi({ type: 'view', path: '/', visitorId: 'visitor-1' });
+
+    expect(get).toHaveBeenNthCalledWith(1, '/v1/posts/story%2Fexample/comments');
+    expect(post).toHaveBeenNthCalledWith(1, '/v1/posts/story%2Fexample/comments', {
+      name: 'Jane', body: 'Hello',
+    });
+    expect(get).toHaveBeenNthCalledWith(2, '/v1/posts/story%2Fexample/like', {
+      params: { visitorId: 'visitor-1' },
+    });
+    expect(post).toHaveBeenNthCalledWith(2, '/v1/posts/story%2Fexample/like', {
+      visitorId: 'visitor-1',
+    });
+    expect(get).toHaveBeenNthCalledWith(3, '/v1/ads', { params: { placement: 'sidebar' } });
+    expect(get).toHaveBeenNthCalledWith(4, '/v1/social');
+    expect(post).toHaveBeenNthCalledWith(3, '/v1/track', {
+      type: 'view', path: '/', visitorId: 'visitor-1',
+    });
   });
 });

@@ -6,7 +6,6 @@ interface Props {
   items: TabItem[];
   activeKey: string;
   label: string;
-  /** prefix for analytics clicks, e.g. "nav" gives data-track="nav:business" */
   trackPrefix?: string;
 }
 

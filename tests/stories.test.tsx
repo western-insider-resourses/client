@@ -3,9 +3,22 @@ import { render, screen } from '@testing-library/react';
 import PostCard, { FeaturedCard } from '@/components/PostCard';
 import StoryList from '@/components/StoryList';
 import Pagination from '@/components/Pagination';
-import { queryDummyPosts } from '@/lib/dummyData';
 
-const { posts } = queryDummyPosts({ limit: 6 });
+const posts = Array.from({ length: 6 }, (_, index) => ({
+  id: `post-${index + 1}`,
+  title: `Story ${index + 1}`,
+  slug: `story-${index + 1}`,
+  excerpt: 'A sample story excerpt.',
+  featured: index === 0,
+  author: 'Staff',
+  views: 100,
+  published_at: '2026-10-01T00:00:00.000Z',
+  category_name: 'Business',
+  category_slug: 'business',
+  cover: null,
+  likes: 0,
+  comments: 0,
+}));
 
 describe('PostCard', () => {
   it('links to the story and shows its niche badge', () => {

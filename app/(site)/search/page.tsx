@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { getPosts } from '@/lib/data';
-import StoryList from '@/components/StoryList';
+import StoryFeed from '@/components/StoryFeed';
 import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = { title: 'Search' };
@@ -8,13 +7,9 @@ export const metadata: Metadata = { title: 'Search' };
 export default async function Search(props: { searchParams?: Promise<{ q?: string }> }) {
   const searchParams = await props.searchParams;
   const q = (searchParams?.q || '').trim();
-  const data = q ? await getPosts({ q, limit: 24 }) : null;
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-      <div>
-        <h1 className="mb-6 font-serif text-3xl font-extrabold">{q ? `Results for "${q}"` : 'Search stories'}</h1>
-        {q ? <StoryList posts={data?.posts} /> : <p className="text-mute">Type a word in the search box above.</p>}
-      </div>
+      <StoryFeed params={q ? { q, limit: 24 } : undefined} heading={q ? `Results for "${q}"` : 'Search stories'} showEmptyQuery />
       <Sidebar />
     </div>
   );
