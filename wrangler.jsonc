@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "client",
+  "account_id": "a7d20859c393441e59198cc55bf13eff",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-12",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
